@@ -44,14 +44,14 @@ function s3Push {
   executeCmd "s3cmd ls ${keys_str} ${bucket}/${key}"
 }
 
-: ${DRY_RUN:=true} && export DRY_RUN
+: ${dry_run:=true} && export dry_run
 bucket='s3://static.dotcms.com'
 keys_str="--access_key=${aws_access_key_id} --secret_key=${aws_secret_access_key}"
 
 echo "##################
 Github Action vars
 ##################
-DRY_RUN: ${DRY_RUN}
+dry_run: ${dry_run}
 "
 
 mkdir -p /src
@@ -79,11 +79,11 @@ popd
 
 cp -R /app/out ./${version}
 
-if [[ "${DRY_RUN}" != 'true' ]]; then
+if [[ "${dry_run}" != 'true' ]]; then
   s3Push ${doc_key}/ ./${version}
 else
-  echo "Since DRY_RUN is true, skipping push of ${version} version to S3 bucket ${bucket}"
-  echo "Command to run when not in DRY_RUN mode:
+  echo "Since dry_run is true, skipping push of ${version} version to S3 bucket ${bucket}"
+  echo "Command to run when not in dry_run mode:
   s3Push ${doc_key}/ ./${version} -> 
   s3cmd put ${keys_str} --recursive --quiet ${object} ${bucket}/${key}
 "
