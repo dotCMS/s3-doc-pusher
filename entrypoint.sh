@@ -44,14 +44,18 @@ function s3Push {
   executeCmd "s3cmd ls ${keys_str} ${bucket}/${key}"
 }
 
-: ${dry_run:=true} && export dry_run
+dry_run=${INPUT_DRY_RUN}
+[[ -z "${dry_run}" ]] && dry_run=true
 bucket='s3://static.dotcms.com'
-keys_str="--access_key=${aws_access_key_id} --secret_key=${aws_secret_access_key}"
+keys_str="--access_key=${INPUT_AWS_ACCESS_KEY_ID} --secret_key=${INPUT_AWS_SECRET_ACCESS_KEY}"
 
 echo "##################
 Github Action vars
 ##################
 dry_run: ${dry_run}
+aws_access_key_id: ${INPUT_AWS_ACCESS_KEY_ID}
+aws_secret_access_key: ${INPUT_AWS_SECRET_ACCESS_KEY}
+bucket: ${bucket}
 "
 
 mkdir -p /src
@@ -67,6 +71,7 @@ version=$(cat ./package.json \
     | awk -F: '{ print $2 }' \
     | sed 's/[",]//g' \
     | tr -d '[[:space:]]')
+echo "Found VERSION: ${version}"
 doc_key="docs/${version}"
 
 echo "Pushing documentation for ${version} version to ${bucket}"
@@ -79,12 +84,5 @@ popd
 
 cp -R /app/out ./${version}
 
-if [[ "${dry_run}" != 'true' ]]; then
-  s3Push ${doc_key}/ ./${version}
-else
-  echo "Since dry_run is true, skipping push of ${version} version to S3 bucket ${bucket}"
-  echo "Command to run when not in dry_run mode:
-  s3Push ${doc_key}/ ./${version} -> 
-  s3cmd put ${keys_str} --recursive --quiet ${object} ${bucket}/${key}
-"
-fi
+[[ "${dry_run}" == 'true' ]] && doc_key="cicd-test/${doc_key}"
+executeCmd "s3Push ${doc_key}/ ./${version}"
