@@ -82,5 +82,9 @@ cp -R /app/out ./${version}
 if [[ "${DRY_RUN}" != 'true' ]]; then
   s3Push ${doc_key}/ ./${version}
 else
-    echo "Since DRY_RUN is true, skipping push of ${version} version to S3 bucket ${bucket}"
+  echo "Since DRY_RUN is true, skipping push of ${version} version to S3 bucket ${bucket}"
+  echo "Command to run when not in DRY_RUN mode:
+  s3Push ${doc_key}/ ./${version} -> 
+  s3cmd put ${keys_str} --recursive --quiet ${object} ${bucket}/${key}
+"
 fi
