@@ -85,4 +85,4 @@ popd
 cp -R /app/out ./${version}
 
 [[ "${dry_run}" == 'true' ]] && doc_key="cicd-test/${doc_key}"
-executeCmd "s3Push ${doc_key}/ ./${version}"
+executeCmd "s3Push ${doc_key}/ ./${version}/*"
