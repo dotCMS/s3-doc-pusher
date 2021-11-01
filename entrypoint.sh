@@ -72,7 +72,8 @@ version=$(cat ./package.json \
     | sed 's/[",]//g' \
     | tr -d '[[:space:]]')
 echo "Found VERSION: ${version}"
-doc_key="docs/${version}"
+#doc_key="docs/${version}"
+doc_key="docs"
 
 echo "Pushing documentation for ${version} version to ${bucket}"
 executeCmd "yarn install --frozen-lockfile"
@@ -85,4 +86,4 @@ popd
 cp -R /app/out ./${version}
 
 [[ "${dry_run}" == 'true' ]] && doc_key="cicd-test/${doc_key}"
-executeCmd "s3Push ${doc_key}/ ./${version}/*"
+executeCmd "s3Push ${doc_key}/ ./${version}"
