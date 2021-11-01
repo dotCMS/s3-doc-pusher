@@ -80,7 +80,7 @@ executeCmd "yarn install --frozen-lockfile"
 executeCmd "mv __staticsite_/[urlTitle].tsx pages/"
 executeCmd "mv __staticsite_/codeshare/[urlTitle].tsx pages/codeshare/"
 executeCmd "mv __staticsite_/codeshare/topic/[topic].tsx pages/codeshare/topic/"
-executeCmd "BASE_PATH=/${version} yarn build && yarn export"
+executeCmd "BASE_PATH=/docs/${version} yarn build && yarn export"
 popd
 
 cp -R /app/out ./${version}
