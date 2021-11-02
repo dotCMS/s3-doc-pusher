@@ -30,24 +30,20 @@ ${cmd}"
 # $1: key: key to identifies object in bucket
 # $2: object: object to sore in bucket
 function s3Push {
-  local key=${1}
-  local object=${2}
+  local object=${1}
+  local key=${2}
+  local ct=${3}
 
-  # Use 's3cmd' tool to push whether is a file or an entire folder
-  if [[ -d ${object} ]]; then
-    executeCmd "s3cmd put ${keys_str} --recursive --quiet ${object} ${bucket}/${key}"
-  else
-    executeCmd "s3cmd put ${keys_str} ${object} ${bucket}/${key}"
-  fi
-
+  executeCmd "${keys_str} aws s3 cp ${object} ${bucket}/${key} --recursive ${dry_run_param}"
   # List contents in bucket for that particular key
-  executeCmd "s3cmd ls ${keys_str} ${bucket}/${key}"
+  executeCmd "${keys_str} aws s3 ls ${bucket}/${key}"
 }
 
 dry_run=${INPUT_DRY_RUN}
 [[ -z "${dry_run}" ]] && dry_run=true
+[[ "${dry_run}" == 'true' ]] && dry_run_param='--dryrun'
 bucket='s3://static.dotcms.com'
-keys_str="--access_key=${INPUT_AWS_ACCESS_KEY_ID} --secret_key=${INPUT_AWS_SECRET_ACCESS_KEY}"
+keys_str="export AWS_ACCESS_KEY_ID=${INPUT_AWS_ACCESS_KEY_ID}; export AWS_SECRET_ACCESS_KEY=${INPUT_AWS_SECRET_ACCESS_KEY};"
 
 echo "##################
 Github Action vars
@@ -85,7 +81,7 @@ popd
 
 cp -R /app/out ./${version}
 
-[[ "${dry_run}" == 'true' ]] && doc_key="cicd-test/${doc_key}"
-executeCmd "s3Push ${doc_key}/ ./${version}"
-executeCmd "s3cmd ls ${keys_str} ${bucket}/${doc_key}/${version}"
-executeCmd "s3cmd ls ${keys_str} ${bucket}/${doc_key}/${version}/"
+executeCmd "s3Push ./${version} ${doc_key}"
+# for css in $(find ./${version} -name "*.css"); do
+#   executeCmd "s3Push ${doc_key}/$(dirname ${css:2}) ${css} --guess-mime-type"
+# done;
